@@ -1,0 +1,1412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trend Trail</title>
+  <style>
+:root {
+  --bg-top: #fff4db;
+  --bg-bottom: #ffe1df;
+  --panel: rgba(255, 252, 247, 0.88);
+  --panel-strong: #fffaf3;
+  --ink: #563f36;
+  --muted: #7d6357;
+  --line: rgba(120, 88, 72, 0.14);
+  --peach: #ffa57c;
+  --peach-deep: #ff7d62;
+  --melon: #ffd9a0;
+  --gold: #ffc95b;
+  --mint: #bdecc6;
+  --mint-deep: #5bbd84;
+  --berry: #ff8da1;
+  --sky: #cce5ff;
+  --lavender: #e8dbff;
+  --shadow: 0 22px 40px rgba(145, 92, 74, 0.12);
+  --setup-scale: 1;
+  --setup-card-min: 165px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: "Trebuchet MS", "Avenir Next", sans-serif;
+  color: var(--ink);
+  background:
+    radial-gradient(circle at top left, rgba(255, 255, 255, 0.65), transparent 30%),
+    radial-gradient(circle at bottom right, rgba(255, 193, 163, 0.38), transparent 24%),
+    linear-gradient(180deg, var(--bg-top), var(--bg-bottom));
+}
+
+.page-shell {
+  width: min(1480px, calc(100vw - 16px));
+  margin: 0 auto;
+  padding: 8px 0 12px;
+}
+
+.hero {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  font-size: 0.75rem;
+  color: var(--peach-deep);
+  font-weight: 800;
+}
+
+h1,
+h2,
+.current-player-name,
+.big-value {
+  font-family: "Trebuchet MS", "Arial Rounded MT Bold", sans-serif;
+  font-weight: 800;
+}
+
+h1 {
+  margin: 0;
+  font-size: clamp(2rem, 3vw, 3.4rem);
+  line-height: 0.95;
+}
+
+.subhead {
+  max-width: 720px;
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.hero-pill {
+  padding: 12px 18px;
+  background: rgba(255, 250, 243, 0.92);
+  border: 2px solid rgba(255, 125, 98, 0.18);
+  border-radius: 999px;
+  box-shadow: var(--shadow);
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.game-layout {
+  display: grid;
+  grid-template-columns: 310px minmax(780px, 1fr);
+  grid-template-areas:
+    "setup play"
+    "setup board";
+  gap: 10px;
+  align-items: start;
+}
+
+.setup-panel {
+  grid-area: setup;
+}
+
+.play-panel {
+  grid-area: play;
+}
+
+.board-panel {
+  grid-area: board;
+}
+
+.panel,
+.board-panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 28px;
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(12px);
+}
+
+.panel {
+  padding: 12px;
+}
+
+.board-panel {
+  padding: 10px;
+}
+
+.panel-header h2,
+.board-header h2 {
+  margin: 0;
+  font-size: 1.35rem;
+}
+
+.panel-header p,
+.board-header p,
+.field span,
+.status-topline,
+.player-token-label,
+.legend-chip,
+.setup-card label {
+  color: var(--muted);
+}
+
+.panel-header p,
+.board-header p {
+  margin: 4px 0 0;
+  font-size: 0.82rem;
+}
+
+.field,
+.setup-card {
+  display: grid;
+  gap: 8px;
+}
+
+.field {
+  margin-top: calc(10px * var(--setup-scale));
+}
+
+select,
+input,
+button {
+  font: inherit;
+}
+
+select,
+input {
+  width: 100%;
+  padding: calc(9px * var(--setup-scale)) calc(11px * var(--setup-scale));
+  border-radius: 16px;
+  border: 1px solid rgba(122, 91, 77, 0.18);
+  background: var(--panel-strong);
+  color: var(--ink);
+}
+
+.player-setup-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(var(--setup-card-min), 1fr));
+  gap: calc(8px * var(--setup-scale));
+  margin: calc(10px * var(--setup-scale)) 0 calc(12px * var(--setup-scale));
+}
+
+.setup-card {
+  padding: calc(10px * var(--setup-scale));
+  border-radius: 20px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.62);
+}
+
+.setup-card h3 {
+  margin: 0;
+  font-size: calc(0.9rem * var(--setup-scale));
+}
+
+.setup-panel .panel-header h2 {
+  font-size: calc(1.35rem * var(--setup-scale));
+}
+
+.setup-panel .panel-header p,
+.setup-panel .field span,
+.setup-panel .setup-card label {
+  font-size: calc(0.82rem * var(--setup-scale));
+}
+
+.setup-panel select,
+.setup-panel input,
+.setup-panel button {
+  font-size: calc(0.92rem * var(--setup-scale));
+}
+
+.token-preview {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+button {
+  border: 0;
+  border-radius: 18px;
+  padding: 10px 14px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 150ms ease, box-shadow 150ms ease, opacity 150ms ease;
+}
+
+button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.primary-btn {
+  width: 100%;
+  background: linear-gradient(135deg, var(--peach), var(--peach-deep));
+  color: white;
+  box-shadow: 0 12px 24px rgba(255, 125, 98, 0.28);
+}
+
+.secondary-btn {
+  background: linear-gradient(135deg, var(--melon), var(--gold));
+  color: var(--ink);
+}
+
+.accent-btn {
+  background: linear-gradient(135deg, var(--mint), var(--mint-deep));
+  color: #13462d;
+}
+
+.board-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  align-items: flex-start;
+  margin-bottom: 6px;
+}
+
+.board-shell {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 210px;
+  gap: 8px;
+  align-items: start;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.legend-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid var(--line);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.legend-chip.good { background: rgba(189, 236, 198, 0.66); }
+.legend-chip.bad { background: rgba(255, 141, 161, 0.28); }
+.legend-chip.card { background: rgba(204, 229, 255, 0.58); }
+.legend-chip.twist { background: rgba(232, 219, 255, 0.6); }
+
+.board {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  grid-template-rows: repeat(5, minmax(72px, auto));
+  gap: 7px;
+  min-height: 0;
+  padding: 10px;
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at center, rgba(255, 250, 243, 0.95) 0 18%, rgba(255, 241, 230, 0.78) 18% 28%, rgba(255, 255, 255, 0) 28%),
+    radial-gradient(circle at center, rgba(255, 255, 255, 0.9) 0 45%, rgba(255, 255, 255, 0) 45%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0.06));
+  border: 1px solid rgba(122, 91, 77, 0.12);
+  overflow: hidden;
+}
+
+.board-side-panel {
+  display: grid;
+  gap: 8px;
+}
+
+.board::before,
+.board::after {
+  content: "";
+  position: absolute;
+  inset: 18% 20%;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.board::before {
+  border: 2px dashed rgba(255, 125, 98, 0.18);
+}
+
+.board::after {
+  inset: 31% 34%;
+  background: radial-gradient(circle at center, rgba(255, 201, 91, 0.15), rgba(255, 255, 255, 0));
+}
+
+.space {
+  position: relative;
+  width: auto;
+  min-height: 72px;
+  border-radius: 18px;
+  border: 2px solid transparent;
+  padding: 7px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+  box-shadow: 0 10px 20px rgba(145, 92, 74, 0.11);
+  isolation: isolate;
+}
+
+.space::before {
+  content: "";
+  position: absolute;
+  inset: auto -18px -18px auto;
+  width: 78px;
+  height: 78px;
+  background: rgba(255, 255, 255, 0.26);
+  border-radius: 50%;
+}
+
+.space-start { background: linear-gradient(135deg, #fff7d9, #ffe4a6); }
+.space-boost { background: linear-gradient(135deg, #ebfff1, #bdecc6); }
+.space-flop { background: linear-gradient(135deg, #ffe8ec, #ffcad4); }
+.space-ad { background: linear-gradient(135deg, #f1f8ff, #cce5ff); }
+.space-twist { background: linear-gradient(135deg, #f5efff, #e8dbff); }
+.space-finish { background: linear-gradient(135deg, #ffe7c5, #ffb876); }
+
+.space.active-space {
+  border-color: rgba(86, 63, 54, 0.55);
+  transform: translateY(-2px);
+}
+
+.space-title {
+  font-weight: 800;
+  position: relative;
+  z-index: 1;
+  font-size: 0.68rem;
+  line-height: 1.05;
+  max-width: 92%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.space-copy {
+  display: none;
+}
+
+.space-index {
+  font-family: "Trebuchet MS", "Arial Rounded MT Bold", sans-serif;
+  font-size: 0.82rem;
+  line-height: 1;
+  opacity: 0.92;
+  position: absolute;
+  top: 6px;
+  right: 7px;
+  z-index: 3;
+  padding: 3px 5px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: 0 2px 8px rgba(86, 63, 54, 0.08);
+}
+
+.space-tokens {
+  display: flex;
+  gap: 3px;
+  flex-wrap: wrap;
+  position: relative;
+  z-index: 3;
+  margin-top: 2px;
+}
+
+.token {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
+}
+
+.play-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(220px, 1fr);
+  gap: 8px;
+  align-items: stretch;
+}
+
+.play-panel .panel-header {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: end;
+}
+
+.play-panel .panel-header p {
+  text-align: right;
+}
+
+.status-card {
+  border-radius: 22px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.68);
+  padding: 8px;
+}
+
+.current-player-card {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.8), rgba(255, 219, 210, 0.8));
+  min-height: 78px;
+  width: 100%;
+}
+
+.status-topline {
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.74rem;
+  font-weight: 800;
+}
+
+.current-player-name {
+  font-size: 1.5rem;
+  line-height: 1;
+  margin-top: 4px;
+}
+
+.current-player-trend {
+  margin-top: 2px;
+  font-weight: 700;
+  font-size: 0.84rem;
+}
+
+.turn-story-card {
+  min-height: 224px;
+}
+
+.turn-side-column {
+  display: grid;
+}
+
+.turn-side-column .scoreboard-card {
+  height: 100%;
+}
+
+.big-value {
+  font-size: 1.7rem;
+  line-height: 1;
+  margin: 4px 0 6px;
+}
+
+.wheel-display {
+  width: 58px;
+  height: 58px;
+  margin: 2px auto 6px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background:
+    conic-gradient(var(--peach) 0 20%, var(--gold) 20% 40%, var(--mint) 40% 60%, var(--sky) 60% 80%, var(--berry) 80% 100%);
+  box-shadow: inset 0 0 0 10px rgba(255, 255, 255, 0.68);
+}
+
+.wheel-display span {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.88);
+  font-family: "Trebuchet MS", "Arial Rounded MT Bold", sans-serif;
+  font-size: 1rem;
+  color: var(--ink);
+}
+
+.event-log {
+  min-height: 34px;
+  margin: 6px 0 8px;
+  color: var(--ink);
+  line-height: 1.5;
+}
+
+.event-log {
+  min-height: 166px;
+  display: flex;
+  align-items: center;
+  font-size: 1.32rem;
+  font-weight: 700;
+  line-height: 1.14;
+}
+
+#next-turn-btn {
+  width: auto;
+  min-width: 92px;
+  justify-self: stretch;
+  padding: 6px 10px;
+  font-size: 0.72rem;
+  box-shadow: 0 8px 16px rgba(255, 125, 98, 0.2);
+}
+
+.scoreboard {
+  display: grid;
+  gap: 6px;
+  margin-top: 4px;
+  max-height: 100%;
+  overflow: auto;
+}
+
+.board-side-panel .status-card {
+  padding: 8px;
+}
+
+.board-side-panel .status-topline {
+  font-size: 0.68rem;
+}
+
+.ad-modal {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(86, 63, 54, 0.28);
+  backdrop-filter: blur(10px);
+  z-index: 30;
+}
+
+.ad-modal.is-visible {
+  display: flex;
+}
+
+.ad-modal-card {
+  width: min(420px, calc(100vw - 32px));
+  padding: 18px;
+  border-radius: 28px;
+  border: 1px solid rgba(122, 91, 77, 0.16);
+  background: rgba(255, 252, 247, 0.96);
+  box-shadow: 0 28px 60px rgba(86, 63, 54, 0.22);
+  text-align: center;
+}
+
+.ad-modal-copy {
+  margin: 10px 0 16px;
+  color: var(--ink);
+  line-height: 1.45;
+}
+
+.ad-modal-badge {
+  display: inline-flex;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(204, 229, 255, 0.58);
+  border: 1px solid rgba(122, 91, 77, 0.12);
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.score-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 10px;
+  align-items: center;
+  padding: 7px 9px;
+  border-radius: 16px;
+  background: rgba(255, 250, 243, 0.9);
+}
+
+.score-name {
+  font-weight: 800;
+}
+
+.score-meta {
+  color: var(--muted);
+  font-size: 0.76rem;
+}
+
+.score-value {
+  font-weight: 900;
+}
+
+@media (max-width: 1220px) {
+  .game-layout {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "setup"
+      "play"
+      "board";
+  }
+
+  .play-panel {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .page-shell {
+    width: min(100vw - 18px, 100%);
+    padding-top: 14px;
+  }
+
+  .hero,
+  .board-header,
+  .dice-wheel-row,
+  .play-panel .panel-header {
+    grid-template-columns: 1fr;
+    display: grid;
+  }
+
+  .play-panel .panel-header p {
+    text-align: left;
+  }
+
+  .legend {
+    justify-content: flex-start;
+  }
+
+  .board {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: none;
+    min-height: 0;
+    padding: 8px;
+    gap: 10px;
+  }
+
+  .board-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .space {
+    width: auto;
+    min-height: 110px;
+  }
+
+  .space-title {
+    font-size: 0.75rem;
+    white-space: normal;
+  }
+
+  .space-copy {
+    display: block;
+    font-size: 0.62rem;
+    line-height: 1.15;
+    color: var(--muted);
+    position: relative;
+    z-index: 1;
+  }
+
+  .space.active-space {
+    transform: translateY(-2px);
+  }
+}
+  </style>
+</head>
+<body>
+  <div class="page-shell">
+    <header class="hero">
+      <div>
+        <h1>Trend Trail</h1>
+        <p class="subhead">A playful party board game about rising trends, ad buys, sudden flops, and surprise follower booms.</p>
+      </div>
+      <div class="hero-pill">2-4 local players</div>
+    </header>
+
+    <main class="game-layout">
+      <section class="panel setup-panel">
+        <div class="panel-header">
+          <h2>Game Setup</h2>
+          <p>Pick the number of players, then choose from each player's three drawn trend and audience options.</p>
+        </div>
+
+        <label class="field">
+          <span>Players</span>
+          <select id="player-count"></select>
+        </label>
+
+        <div id="player-setup-list" class="player-setup-list"></div>
+
+        <button id="start-game-btn" class="primary-btn">Start the Trend Race</button>
+      </section>
+
+      <section class="board-panel">
+        <div class="board-header">
+          <div>
+            <h2>Trend Trail Board</h2>
+            <p>Roll through a winding trail of boosts, flops, ad breaks, and wild trend swings to finish on top.</p>
+          </div>
+          <div class="legend">
+            <span class="legend-chip good">Boost</span>
+            <span class="legend-chip bad">Flop</span>
+            <span class="legend-chip card">Ad Card</span>
+            <span class="legend-chip twist">Trend Twist</span>
+          </div>
+        </div>
+        <div class="board-shell">
+          <div id="board" class="board"></div>
+
+          <div class="board-side-panel">
+            <div class="dice-wheel-row">
+              <div class="status-card">
+                <div class="status-topline">Dice Roll</div>
+                <div id="dice-value" class="big-value">-</div>
+                <button id="roll-dice-btn" class="accent-btn" disabled>Roll Dice</button>
+              </div>
+
+              <div class="status-card">
+                <div class="status-topline">Ad Wheel</div>
+                <div id="wheel-display" class="wheel-display">
+                  <span id="wheel-multiplier">x0</span>
+                </div>
+                <button id="spin-wheel-btn" class="accent-btn" disabled>Spin Wheel</button>
+              </div>
+            </div>
+
+            <button id="next-turn-btn" class="primary-btn" disabled>Next Turn</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel play-panel">
+        <div class="panel-header">
+          <h2>Turn Center</h2>
+          <p id="phase-label">Set up the players to begin.</p>
+        </div>
+
+        <div class="turn-main-column">
+          <div class="status-card current-player-card">
+            <div class="status-topline">Current player</div>
+            <div id="current-player-name" class="current-player-name">Waiting to start</div>
+            <div id="current-player-trend" class="current-player-trend">Choose your trends first</div>
+          </div>
+
+          <div class="status-card turn-story-card">
+            <div class="status-topline">Turn Story</div>
+            <div id="event-log" class="event-log">The board is waiting for your first trend star.</div>
+          </div>
+        </div>
+
+        <div class="turn-side-column">
+          <div class="status-card scoreboard-card">
+            <div class="status-topline">Scoreboard</div>
+            <div id="scoreboard" class="scoreboard"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="ad-modal" class="ad-modal" aria-hidden="true">
+    <div class="ad-modal-card">
+      <div class="ad-modal-badge">Ad Card</div>
+      <div id="draw-result" class="ad-modal-copy">Land on an Ad Card space to draw a campaign amount.</div>
+      <button id="draw-card-btn" class="secondary-btn" disabled>Continue</button>
+    </div>
+  </div>
+
+  <script>
+const playerCountSelect = document.getElementById("player-count");
+const playerSetupList = document.getElementById("player-setup-list");
+const startGameBtn = document.getElementById("start-game-btn");
+const boardElement = document.getElementById("board");
+const phaseLabel = document.getElementById("phase-label");
+const currentPlayerName = document.getElementById("current-player-name");
+const currentPlayerTrend = document.getElementById("current-player-trend");
+const diceValue = document.getElementById("dice-value");
+const wheelMultiplier = document.getElementById("wheel-multiplier");
+const drawResult = document.getElementById("draw-result");
+const eventLog = document.getElementById("event-log");
+const scoreboard = document.getElementById("scoreboard");
+const rollDiceBtn = document.getElementById("roll-dice-btn");
+const drawCardBtn = document.getElementById("draw-card-btn");
+const spinWheelBtn = document.getElementById("spin-wheel-btn");
+const nextTurnBtn = document.getElementById("next-turn-btn");
+const adModal = document.getElementById("ad-modal");
+
+const tokenColors = ["#ff7d62", "#5bbd84", "#5f8ee8", "#b478ff"];
+const trends = [
+  "Matching Sets",
+  "Aura Rings",
+  "Blue Light Glasses",
+  "Needohs",
+  "Polka Dots",
+  "Hydro Jugs",
+  "Headbands",
+  "Comfrt",
+  "Tubing Mascara",
+  "Alex Earles Makeup Line",
+  "Olivia Rodrigo music",
+  "Lululemon Summer Drop",
+  "Pickleball",
+  "Larping",
+  "Parke Sweatshirts",
+  "James Charles",
+  "Beiberchella"
+];
+const startPackages = [
+  { label: "New", value: 18 },
+  { label: "Amateur", value: 22 },
+  { label: "Beginner", value: 28 },
+  { label: "Rising", value: 31 },
+  { label: "Popular", value: 36 },
+  { label: "Trending", value: 40 },
+  { label: "Viral", value: 45 }
+];
+const wheelValues = [0, 1, 1, 2, 2, 3, 4];
+const boostReasons = [
+  "their trend got a celebrity endorsement",
+  "their product hit mainstream media",
+  "their trend is cheap and easy to follow",
+  "their viewers are experiencing FOMO and they want to join everyone else",
+  "their trend is visually appealing"
+];
+const flopReasons = [
+  "there was controversy around their trend",
+  "they ended up endorsing the wrong product",
+  "the influencer tied to their trend is getting canceled",
+  "their trend experienced a loss of novelty",
+  "their trend lost visibility in the media",
+  "their trend is too complicated to follow",
+  "their trend was seen as cringy or weird"
+];
+
+const boardSpaces = [
+  { type: "start", title: "Trend Launch", copy: "Every star starts somewhere soft and sparkly." },
+  { type: "boost", title: "Lucky Repost", copy: "+8 followers from a huge repost." },
+  { type: "boost", title: "Campus Buzz", copy: "+6 followers from word spreading fast." },
+  { type: "twist", title: "Trend Shift", copy: "The vibe changed overnight. Move back 2 spaces." },
+  { type: "ad", title: "Ad Break", copy: "Draw an ad card, then spin the wheel." },
+  { type: "flop", title: "Comment Pile-On", copy: "-7 followers after a rough reply chain." },
+  { type: "boost", title: "Fan Art Bloom", copy: "+12 followers from sweet community love." },
+  { type: "flop", title: "Shipping Delay", copy: "-6 followers and people get grumpy." },
+  { type: "boost", title: "Cute Collab", copy: "+10 followers from a perfect collab." },
+  { type: "boost", title: "Morning TV Clip", copy: "+7 followers from a surprise feature." },
+  { type: "twist", title: "Algorithm Dip", copy: "Got lost in the algorithm. Move back 3 spaces." },
+  { type: "ad", title: "Brand Call", copy: "Ad draw and a spin for campaign results." },
+  { type: "boost", title: "Sold Out Drop", copy: "+14 purchases because everyone rushed in." },
+  { type: "flop", title: "Cringe Clip", copy: "-10 followers after a rough post lands badly." },
+  { type: "twist", title: "Trend Fatigue", copy: "Because of a loss of novelty, move back 2 spaces." },
+  { type: "boost", title: "Trend Forecast", copy: "+9 followers from calling the next big thing." },
+  { type: "twist", title: "Copycat Era", copy: "Too many clones. Lose 8 followers." },
+  { type: "boost", title: "Pop-Up Queue", copy: "+13 purchases after a long line forms." },
+  { type: "ad", title: "Sponsor Sprint", copy: "Draw your ad amount and spin for payout." },
+  { type: "boost", title: "Celebrity Mention", copy: "+16 followers from a surprise shoutout." },
+  { type: "flop", title: "Refund Wave", copy: "-12 purchases after a messy launch day." },
+  { type: "flop", title: "Trend Took a Nap", copy: "-8 followers after interest cools off." },
+  { type: "boost", title: "Main Character Week", copy: "+11 followers from pure spotlight." },
+  { type: "twist", title: "Hot Take Fallout", copy: "Move back 2 and lose 5 followers." },
+  { type: "ad", title: "Prime Placement", copy: "Big ad zone. Draw and spin for growth." },
+  { type: "boost", title: "Rebrand Reveal", copy: "+10 followers because the new look lands." },
+  { type: "flop", title: "Bad Batch", copy: "-9 purchases after a quality slip." },
+  { type: "twist", title: "Trend Loop", copy: "Jump forward 3 spaces as the trend comes back." },
+  { type: "ad", title: "Festival Booth", copy: "Draw your ad amount and spin for a crowd surge." },
+  { type: "boost", title: "Trend Crown", copy: "+18 followers from total domination." },
+  { type: "flop", title: "Sneaky Copycat", copy: "-11 followers when a rival steals the moment." },
+  { type: "boost", title: "Collector Craze", copy: "+15 purchases from a must-have drop." },
+  { type: "twist", title: "Viral Whiplash", copy: "Move back 4 spaces after attention flips fast." },
+  { type: "ad", title: "Last-Minute Blitz", copy: "Draw an ad card and spin for one final push." },
+  { type: "finish", title: "Final Feed", copy: "Finish strong and count every last follower." }
+];
+
+const boardLayout = createBoardLayout(boardSpaces.length);
+
+const gameState = {
+  players: [],
+  currentPlayerIndex: 0,
+  phase: "setup",
+  awaitingAdResolution: false,
+  pendingAdValue: 0,
+  lastRoll: 0,
+  winner: null
+};
+
+function randomChoice(items) {
+  return items[Math.floor(Math.random() * items.length)];
+}
+
+function sampleWithoutReplacement(items, count) {
+  const pool = [...items];
+  const result = [];
+
+  while (result.length < count && pool.length > 0) {
+    const randomIndex = Math.floor(Math.random() * pool.length);
+    const [picked] = pool.splice(randomIndex, 1);
+    result.push(picked);
+  }
+
+  return result;
+}
+
+function createBoardLayout(count) {
+  const columns = 7;
+  const rows = Math.ceil(count / columns);
+  const layout = [];
+
+  for (let row = rows; row >= 1; row -= 1) {
+    const rowIndexFromBottom = rows - row;
+    const leftToRight = rowIndexFromBottom % 2 === 0;
+
+    for (let columnOffset = 0; columnOffset < columns; columnOffset += 1) {
+      const column = leftToRight ? columnOffset + 1 : columns - columnOffset;
+      layout.push({ col: column, row });
+      if (layout.length === count) {
+        return layout;
+      }
+    }
+  }
+
+  return layout;
+}
+
+function populatePlayerCount() {
+  for (let count = 2; count <= 4; count += 1) {
+    const option = document.createElement("option");
+    option.value = String(count);
+    option.textContent = `${count} players`;
+    playerCountSelect.append(option);
+  }
+  playerCountSelect.value = "2";
+}
+
+function createSetupInputs() {
+  const count = Number(playerCountSelect.value);
+  updateSetupScale(count);
+  playerSetupList.innerHTML = "";
+
+  for (let index = 0; index < count; index += 1) {
+    const trendChoices = sampleWithoutReplacement(trends, 3);
+    const audienceChoices = sampleWithoutReplacement(startPackages, 3);
+    const card = document.createElement("div");
+    card.className = "setup-card";
+
+    const title = document.createElement("h3");
+    title.innerHTML = `<span class="token-preview" style="background:${tokenColors[index]}"></span>Player ${index + 1}`;
+    card.append(title);
+
+    const nameLabel = document.createElement("label");
+    nameLabel.textContent = "Name";
+    const nameInput = document.createElement("input");
+    nameInput.type = "text";
+    nameInput.maxLength = 16;
+    nameInput.value = `Player ${index + 1}`;
+    nameInput.dataset.role = "name";
+    nameInput.dataset.index = String(index);
+    card.append(nameLabel, nameInput);
+
+    const trendLabel = document.createElement("label");
+    trendLabel.textContent = "Pick a Trend";
+    const trendSelect = document.createElement("select");
+    trendSelect.dataset.role = "trend";
+    trendSelect.dataset.index = String(index);
+    buildOptions(trendSelect, trendChoices);
+    trendSelect.value = trendChoices[0];
+    card.append(trendLabel, trendSelect);
+
+    const packageLabel = document.createElement("label");
+    packageLabel.textContent = "Pick a Starting Following";
+    const packageSelect = document.createElement("select");
+    packageSelect.dataset.role = "package";
+    packageSelect.dataset.index = String(index);
+    buildOptions(packageSelect, audienceChoices.map((item) => `${item.label} (${item.value})`));
+    packageSelect.value = `${audienceChoices[0].label} (${audienceChoices[0].value})`;
+    card.append(packageLabel, packageSelect);
+
+    playerSetupList.append(card);
+  }
+}
+
+function updateSetupScale(count) {
+  const scales = {
+    2: 1,
+    3: 0.9,
+    4: 0.82
+  };
+  const cardWidths = {
+    2: "165px",
+    3: "150px",
+    4: "132px"
+  };
+
+  document.documentElement.style.setProperty("--setup-scale", String(scales[count] || 1));
+  document.documentElement.style.setProperty("--setup-card-min", cardWidths[count] || "165px");
+}
+
+function buildOptions(select, values) {
+  select.innerHTML = "";
+  values.forEach((value) => {
+    const option = document.createElement("option");
+    option.value = value;
+    option.textContent = value;
+    select.append(option);
+  });
+}
+
+function startGame() {
+  const cards = [...playerSetupList.querySelectorAll(".setup-card")];
+
+  gameState.players = cards.map((card, index) => {
+    const name = card.querySelector('[data-role="name"]').value.trim() || `Player ${index + 1}`;
+    const trend = card.querySelector('[data-role="trend"]').value;
+    const packageLabel = card.querySelector('[data-role="package"]').value;
+    const startValue = Number(packageLabel.match(/\((\d+)\)/)[1]);
+
+    return {
+      id: index,
+      name,
+      trend,
+      color: tokenColors[index],
+      score: startValue,
+      position: 0,
+      finished: false
+    };
+  });
+
+  gameState.currentPlayerIndex = 0;
+  gameState.phase = "roll";
+  gameState.awaitingAdResolution = false;
+  gameState.pendingAdValue = 0;
+  gameState.lastRoll = 0;
+  gameState.winner = null;
+
+  diceValue.textContent = "-";
+  wheelMultiplier.textContent = "x0";
+  drawResult.textContent = "Land on an Ad Card space to draw a campaign amount.";
+  setAdModalVisible(false);
+  setEventLog("The race is on. Roll the dice and see which trend explodes first.");
+  phaseLabel.textContent = "Roll the dice to start the first turn.";
+  startGameBtn.textContent = "Restart Game";
+  nextTurnBtn.textContent = "Next Turn";
+
+  renderBoard();
+  renderScoreboard();
+  updateTurnPanel();
+  setActionState({ roll: true, draw: false, spin: false, next: false });
+}
+
+function renderBoard() {
+  boardElement.innerHTML = "";
+
+  boardSpaces.forEach((space, index) => {
+    const spaceElement = document.createElement("div");
+    spaceElement.className = `space space-${space.type}`;
+    spaceElement.tabIndex = 0;
+    const layout = boardLayout[index];
+    if (layout) {
+      spaceElement.style.gridColumn = String(layout.col);
+      spaceElement.style.gridRow = String(layout.row);
+    }
+    const occupants = gameState.players.filter((player) => player.position === index);
+    if (occupants.some((player) => player.id === gameState.currentPlayerIndex) && gameState.phase !== "setup") {
+      spaceElement.classList.add("active-space");
+    }
+
+    const number = document.createElement("div");
+    number.className = "space-index";
+    number.textContent = index;
+
+    const title = document.createElement("div");
+    title.className = "space-title";
+    title.textContent = space.title;
+
+    const copy = document.createElement("div");
+    copy.className = "space-copy";
+    copy.textContent = space.copy;
+
+    const tokens = document.createElement("div");
+    tokens.className = "space-tokens";
+    occupants.forEach((player) => {
+      const token = document.createElement("span");
+      token.className = "token";
+      token.title = player.name;
+      token.style.background = player.color;
+      tokens.append(token);
+    });
+
+    spaceElement.append(number, title, copy, tokens);
+    boardElement.append(spaceElement);
+  });
+}
+
+function formatSpaceType(type) {
+  const labels = {
+    start: "Start",
+    boost: "Boost",
+    flop: "Flop",
+    ad: "Ad Card",
+    twist: "Trend Twist",
+    finish: "Finish"
+  };
+
+  return labels[type] || type;
+}
+
+function renderScoreboard() {
+  scoreboard.innerHTML = "";
+
+  const sortedPlayers = [...gameState.players].sort((a, b) => b.score - a.score);
+  sortedPlayers.forEach((player) => {
+    const row = document.createElement("div");
+    row.className = "score-row";
+
+    const token = document.createElement("span");
+    token.className = "token";
+    token.style.background = player.color;
+
+    const info = document.createElement("div");
+    const name = document.createElement("div");
+    name.className = "score-name";
+    name.textContent = player.name;
+    const meta = document.createElement("div");
+    meta.className = "score-meta";
+    meta.textContent = `${player.trend} • space ${player.position}`;
+    info.append(name, meta);
+
+    const value = document.createElement("div");
+    value.className = "score-value";
+    value.textContent = `${player.score} followers`;
+
+    row.append(token, info, value);
+    scoreboard.append(row);
+  });
+}
+
+function updateTurnPanel() {
+  if (gameState.phase === "setup") {
+    currentPlayerName.textContent = "Waiting to start";
+    currentPlayerTrend.textContent = "Choose your trends first";
+    return;
+  }
+
+  const player = getCurrentPlayer();
+  currentPlayerName.textContent = player.name;
+  currentPlayerTrend.textContent = `${player.trend} • ${player.score} followers`;
+}
+
+function getCurrentPlayer() {
+  return gameState.players[gameState.currentPlayerIndex];
+}
+
+function setActionState({ roll, draw, spin, next }) {
+  rollDiceBtn.disabled = !roll;
+  drawCardBtn.disabled = !draw;
+  spinWheelBtn.disabled = !spin;
+  nextTurnBtn.disabled = !next;
+}
+
+function setAdModalVisible(visible) {
+  adModal.classList.toggle("is-visible", visible);
+  adModal.setAttribute("aria-hidden", String(!visible));
+}
+
+function fitStoryText() {
+  const minSize = 0.96;
+  const maxSize = 1.42;
+  let size = maxSize;
+
+  eventLog.style.fontSize = `${size}rem`;
+  while (eventLog.scrollHeight > eventLog.clientHeight && size > minSize) {
+    size -= 0.04;
+    eventLog.style.fontSize = `${size}rem`;
+  }
+}
+
+function setEventLog(text) {
+  eventLog.textContent = text;
+  fitStoryText();
+}
+
+function pickRandom(list) {
+  return list[Math.floor(Math.random() * list.length)];
+}
+
+function rollDice() {
+  const player = getCurrentPlayer();
+  const value = Math.floor(Math.random() * 6) + 1;
+  diceValue.textContent = String(value);
+  gameState.lastRoll = value;
+
+  player.position = Math.min(player.position + value, boardSpaces.length - 1);
+  renderBoard();
+  resolveSpace(player);
+  renderScoreboard();
+  updateTurnPanel();
+}
+
+function resolveSpace(player) {
+  const space = boardSpaces[player.position];
+
+  if (space.type === "finish") {
+    player.finished = true;
+    finishGame();
+    return;
+  }
+
+  if (space.type === "ad") {
+    gameState.phase = "draw";
+    gameState.awaitingAdResolution = true;
+    gameState.pendingAdValue = 0;
+    setEventLog(`${player.name}'s trend caught enough attention to land a sponsored ad opportunity.`);
+    drawResult.textContent = `${player.name} has gotten the chance to advertise their product. ${player.name} has rolled a ${gameState.lastRoll}, so their total engagement will start with ${gameState.lastRoll} followers. That number will be multiplied by the number you spin on the ad wheel and those followers will be added.`;
+    phaseLabel.textContent = `${player.name} needs to draw an ad card.`;
+    setAdModalVisible(true);
+    setActionState({ roll: false, draw: true, spin: false, next: false });
+    return;
+  }
+
+  applySpaceEffect(player, space);
+  concludeTurn(player);
+}
+
+function applySpaceEffect(player, space) {
+  switch (space.type) {
+    case "boost": {
+      const amount = parseFirstNumber(space.copy);
+      const reason = pickRandom(boostReasons);
+      player.score += amount;
+      setEventLog(`${player.name} gained ${amount} followers because ${reason}.`);
+      break;
+    }
+    case "flop": {
+      const amount = parseFirstNumber(space.copy);
+      const reason = pickRandom(flopReasons);
+      player.score = Math.max(0, player.score - amount);
+      setEventLog(`${player.name} lost ${amount} followers because ${reason}.`);
+      break;
+    }
+    case "twist":
+      handleTwistSpace(player, space);
+      break;
+    default:
+      setEventLog(`${player.name}'s trend stayed steady this turn without a major rise or fall.`);
+  }
+}
+
+function handleTwistSpace(player, space) {
+  if (space.title === "Algorithm Dip") {
+    player.position = Math.max(0, player.position - 3);
+    setEventLog(`${player.name}'s trend got lost in the algorithm and slid back 3 spaces.`);
+  } else if (space.title === "Viral Whiplash") {
+    player.position = Math.max(0, player.position - 4);
+    setEventLog(`${player.name}'s trend got viral whiplash and slid back 4 spaces.`);
+  } else if (space.title === "Trend Loop") {
+    player.position = Math.min(boardSpaces.length - 1, player.position + 3);
+    setEventLog(`${player.name}'s trend came back around and jumped forward 3 spaces.`);
+  } else if (space.title === "Trend Fatigue") {
+    player.position = Math.max(0, player.position - 2);
+    setEventLog(`${player.name}'s trend is experiencing trend fatigue because of a loss of novelty and slid back 2 spaces.`);
+  } else if (space.title === "Hot Take Fallout") {
+    player.position = Math.max(0, player.position - 2);
+    player.score = Math.max(0, player.score - 5);
+    setEventLog(`${player.name}'s hot take backfired, so they moved back 2 spaces and lost 5 followers.`);
+  } else if (space.title === "Trend Shift") {
+    player.position = Math.max(0, player.position - 2);
+    setEventLog(`${player.name}'s audience moved on and they slid back 2 spaces.`);
+  } else if (space.title === "Copycat Era") {
+    const amount = parseFirstNumber(space.copy);
+    player.score = Math.max(0, player.score - amount);
+    setEventLog(`${player.name} lost ${amount} followers because copycats made the trend feel less original.`);
+  } else {
+    player.score = Math.max(0, player.score - parseFirstNumber(space.copy));
+    setEventLog(`${player.name} hit ${space.title} and lost ${parseFirstNumber(space.copy)} followers.`);
+  }
+
+  renderBoard();
+}
+
+function parseFirstNumber(text) {
+  const match = text.match(/(\d+)/);
+  return match ? Number(match[1]) : 0;
+}
+
+function drawAdCard() {
+  const player = getCurrentPlayer();
+  const adValue = Math.max(1, gameState.lastRoll);
+  gameState.pendingAdValue = adValue;
+  gameState.phase = "spin";
+  drawResult.textContent = `${player.name}'s ad starts with ${adValue} followers from the roll. Spin the wheel to see how much that campaign grows.`;
+  phaseLabel.textContent = `${player.name} is ready to spin for their ad result.`;
+  setAdModalVisible(false);
+  setActionState({ roll: false, draw: false, spin: true, next: false });
+}
+
+function spinWheel() {
+  const player = getCurrentPlayer();
+  const multiplier = randomChoice(wheelValues);
+  const payout = gameState.pendingAdValue * multiplier;
+  wheelMultiplier.textContent = `x${multiplier}`;
+  player.score += payout;
+  drawResult.textContent = `${player.name} spun x${multiplier} on ${gameState.pendingAdValue} ads and earned ${payout} followers.`;
+  if (payout > 0) {
+    setEventLog(`${player.name} gained ${payout} followers after their ad campaign reached new viewers.`);
+  } else {
+    setEventLog(`${player.name}'s ad campaign did not bring in any new followers this turn.`);
+  }
+  gameState.awaitingAdResolution = false;
+  gameState.pendingAdValue = 0;
+  concludeTurn(player);
+}
+
+function concludeTurn(player) {
+  renderScoreboard();
+  updateTurnPanel();
+
+  if (player.position >= boardSpaces.length - 1) {
+    finishGame();
+    return;
+  }
+
+  gameState.phase = "next";
+  phaseLabel.textContent = `${player.name}'s turn is over. Pass it to the next player.`;
+  setActionState({ roll: false, draw: false, spin: false, next: true });
+}
+
+function nextTurn() {
+  if (gameState.winner) {
+    startGame();
+    return;
+  }
+
+  gameState.currentPlayerIndex = (gameState.currentPlayerIndex + 1) % gameState.players.length;
+  gameState.phase = "roll";
+  diceValue.textContent = "-";
+  wheelMultiplier.textContent = "x0";
+  drawResult.textContent = "Land on an Ad Card space to draw a campaign amount.";
+  setAdModalVisible(false);
+  phaseLabel.textContent = `${getCurrentPlayer().name}, roll the dice.`;
+  updateTurnPanel();
+  renderBoard();
+  setActionState({ roll: true, draw: false, spin: false, next: false });
+}
+
+function finishGame() {
+  const sortedPlayers = [...gameState.players].sort((a, b) => b.score - a.score);
+  gameState.winner = sortedPlayers[0];
+  gameState.phase = "finished";
+  phaseLabel.textContent = `${gameState.winner.name} wins with ${gameState.winner.score} followers.`;
+  currentPlayerName.textContent = `${gameState.winner.name} wins`;
+  currentPlayerTrend.textContent = `${gameState.winner.trend} ruled the feed`;
+  setEventLog(`The trail is complete. ${gameState.winner.name} finishes on top after every boost, flop, and ad gamble.`);
+  setActionState({ roll: false, draw: false, spin: false, next: true });
+  nextTurnBtn.textContent = "Play Again";
+  setAdModalVisible(false);
+  renderBoard();
+  renderScoreboard();
+}
+
+playerCountSelect.addEventListener("change", createSetupInputs);
+startGameBtn.addEventListener("click", () => {
+  nextTurnBtn.textContent = "Next Turn";
+  startGame();
+});
+rollDiceBtn.addEventListener("click", rollDice);
+drawCardBtn.addEventListener("click", drawAdCard);
+spinWheelBtn.addEventListener("click", spinWheel);
+nextTurnBtn.addEventListener("click", nextTurn);
+
+populatePlayerCount();
+createSetupInputs();
+renderBoard();
+fitStoryText();
+window.addEventListener("resize", fitStoryText);
+  </script>
+</body>
+</html>
